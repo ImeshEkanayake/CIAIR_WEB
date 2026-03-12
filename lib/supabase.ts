@@ -1,28 +1,34 @@
 import { createClient } from "@supabase/supabase-js"
+import {
+  createMockSupabaseClient,
+  hasAdminSupabaseEnv,
+  hasPublicSupabaseEnv,
+  logMissingSupabaseEnv,
+} from "@/lib/supabase/mock"
 
 // Get environment variables with better error handling
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-// Validate environment variables
-if (!supabaseUrl) {
-  console.error("Missing environment variable: NEXT_PUBLIC_SUPABASE_URL")
+if (!hasPublicSupabaseEnv()) {
+  logMissingSupabaseEnv()
 }
 
-if (!supabaseAnonKey) {
-  console.error("Missing environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY")
+if (!hasAdminSupabaseEnv()) {
+  logMissingSupabaseEnv(true)
 }
 
-if (!supabaseServiceKey) {
-  console.warn("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY (admin operations may fail)")
-}
+// Create a Supabase client for public usage. When env vars are absent during build,
+// return a mock client so static analysis can complete and pages render empty states.
+export const supabase = hasPublicSupabaseEnv()
+  ? createClient(supabaseUrl!, supabaseAnonKey!)
+  : (createMockSupabaseClient() as ReturnType<typeof createClient>)
 
-// Create a Supabase client for public usage (client-side)
-export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "")
-
-// Create a Supabase client with service role for admin operations (server-side only)
-export const supabaseAdmin = createClient(supabaseUrl || "", supabaseServiceKey || "")
+// Create a Supabase client with service role for admin operations.
+export const supabaseAdmin = hasAdminSupabaseEnv()
+  ? createClient(supabaseUrl!, supabaseServiceKey!)
+  : (createMockSupabaseClient() as ReturnType<typeof createClient>)
 
 // Types for our database tables
 export type ResearchProject = {

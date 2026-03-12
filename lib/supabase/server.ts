@@ -1,9 +1,15 @@
 // lib/supabase/server.ts
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createMockSupabaseClient, hasPublicSupabaseEnv, logMissingSupabaseEnv } from "@/lib/supabase/mock";
 // import type { Database } from "@/types/supabase"; // optional
 
 export const createClient = async () => {
+  if (!hasPublicSupabaseEnv()) {
+    logMissingSupabaseEnv()
+    return createMockSupabaseClient() as ReturnType<typeof createServerComponentClient>
+  }
+
   // Next 15: await first (to satisfy "sync dynamic APIs" rule)
   const cookieStore = await cookies();
 
