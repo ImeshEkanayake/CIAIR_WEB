@@ -1,9 +1,15 @@
+.section {
+  --stack-cards: 6;
+  position: relative;
+}
+
 .stage {
   position: relative;
   width: min(90vw, 1000px);
   height: 600px; /* Increased height to accommodate the image */
   margin: 2rem auto;
   perspective: 1000px; /* gives slight depth if you rotate */
+  isolation: isolate;
 }
 
 .card {
@@ -15,28 +21,30 @@
   grid-template-columns: 1fr;
   align-items: center;
   padding: 2rem;
-  /* Faster, smoother transition with cubic-bezier easing */
-  transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s cubic-bezier(0.25, 0.1, 0.25, 1),
-    box-shadow 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, box-shadow 0.32s ease,
+    filter 0.32s ease;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
   background-color: white;
-  border: 1px solid #eaeaea;
-  will-change: transform, opacity; /* Optimize for animation */
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  will-change: transform, opacity;
+  transform-origin: top center;
+  backface-visibility: hidden;
 }
 
 /* Current card highlight effect */
 .currentCard {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  border-color: #ddd;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.16);
+  border-color: rgba(148, 163, 184, 0.3);
+  filter: saturate(1);
 }
 
 /* Animation classes for direction */
 .scrollingUp {
-  animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideUp 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .scrollingDown {
-  animation: slideDown 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideDown 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes slideUp {
@@ -65,34 +73,34 @@
 .forwardCard::after {
   content: "";
   position: absolute;
-  top: -5px;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background-color: #f0f0f0;
-  border-radius: 5px 5px 0 0;
+  top: -1px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.7), transparent);
+  border-radius: 999px;
 }
 
 /* Add a subtle indicator for backward cards */
 .backwardCard::after {
   content: "";
   position: absolute;
-  bottom: -5px;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background-color: #f0f0f0;
-  border-radius: 0 0 5px 5px;
+  bottom: -1px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.5), transparent);
+  border-radius: 999px;
 }
 
 .dark .card {
   background-color: #1a1a1a;
   border-color: #333;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
 }
 
 .dark .currentCard {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
   border-color: #444;
 }
 
@@ -129,7 +137,7 @@
 .card:not(.dark) {
   background-color: hsl(var(--card));
   border-color: hsl(var(--border));
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
 }
 
 .scrollIndicator:not(.dark) {
@@ -338,13 +346,14 @@
   gap: 8px;
   color: #666;
   font-size: 0.875rem;
-  opacity: 0.8;
+  opacity: 0.9;
   animation: pulse 2s infinite;
   z-index: 1000; /* Ensure it's above the cards */
-  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  background-color: rgba(255, 255, 255, 0.8);
   padding: 8px 16px;
   border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 @keyframes pulse {

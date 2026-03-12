@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -21,34 +22,47 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
   const topPublications = publications.slice(0, 6)
   const [current, setCurrent] = useState(0)
   const ticking = useRef(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const isAtLastCard = useRef(false)
   const isAtFirstCard = useRef(true)
-  const hasScrolledAllCards = useRef(false)
+  const wheelDeltaAccumulator = useRef(0)
+  const wheelResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [direction, setDirection] = useState<"up" | "down" | null>(null)
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const isMobile = useMobile()
   const cssStyles = isMobile ? mobileStyles : styles
 
-  // Touch handling
-  const touchStartY = useRef(0)
-  const touchEndY = useRef(0)
-  const minSwipeDistance = 50 // Minimum distance for a swipe to register
-
   // Clamp helper
   const clamp = (num: number, min: number, max: number) => Math.max(min, Math.min(num, max))
 
-  // Check if we're at the top of the page
-  const isPageAtTop = () => window.scrollY <= 0
+  const resetWheelAccumulator = useCallback(() => {
+    wheelDeltaAccumulator.current = 0
 
-  // Check if the component is in viewport
+    if (wheelResetTimeout.current) {
+      clearTimeout(wheelResetTimeout.current)
+      wheelResetTimeout.current = null
+    }
+  }, [])
+
+  const scheduleWheelAccumulatorReset = useCallback(() => {
+    if (wheelResetTimeout.current) {
+      clearTimeout(wheelResetTimeout.current)
+    }
+
+    wheelResetTimeout.current = setTimeout(() => {
+      wheelDeltaAccumulator.current = 0
+      wheelResetTimeout.current = null
+    }, 140)
+  }, [])
+
   const isInViewport = useCallback(() => {
     const container = containerRef.current
     if (!container) return false
 
     const rect = container.getBoundingClientRect()
-    return rect.top < window.innerHeight && rect.bottom > 0
+    return rect.top < window.innerHeight * 0.85 && rect.bottom > window.innerHeight * 0.2
   }, [])
 
   // Navigate to next card
@@ -62,11 +76,6 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
       const newCurrent = clamp(c + 1, 0, topPublications.length - 1)
       isAtFirstCard.current = newCurrent === 0
       isAtLastCard.current = newCurrent === topPublications.length - 1
-
-      // If we've reached the last card, mark that we've scrolled through all cards
-      if (newCurrent === topPublications.length - 1) {
-        hasScrolledAllCards.current = true
-      }
 
       return newCurrent
     })
@@ -93,11 +102,6 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
       isAtFirstCard.current = newCurrent === 0
       isAtLastCard.current = newCurrent === topPublications.length - 1
 
-      // If we're no longer at the last card, reset the flag
-      if (newCurrent < topPublications.length - 1) {
-        hasScrolledAllCards.current = false
-      }
-
       return newCurrent
     })
 
@@ -111,192 +115,73 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
     return true
   }, [topPublications.length])
 
-  // Handle scroll events (wheel, touchpad, scroll bar)
-  const handleScroll = useCallback(
-    (e: Event) => {
-      // Only handle scroll events when the component is in viewport
-      if (!isInViewport()) return
-
-      // Get scroll direction from window scroll position change
-      const scrollY = window.scrollY
-      const scrollDirection = scrollY > (window as any).lastScrollY ? "down" : "up"
-      ;(window as any).lastScrollY = scrollY
-
-      // Handle scrolling based on direction
-      if (scrollDirection === "down") {
-        // If we're not at the last card, navigate to next card
-        if (!isAtLastCard.current) {
-          if (goToNextCard()) {
-            // Prevent default scroll behavior
-            e.preventDefault()
-            // Keep scroll position stable
-            window.scrollTo(0, scrollY)
-          }
-        }
-      } else if (scrollDirection === "up") {
-        // If we're at the top of the page and not at the first card, navigate to previous card
-        if (isPageAtTop() && !isAtFirstCard.current) {
-          if (goToPrevCard()) {
-            // Prevent default scroll behavior
-            e.preventDefault()
-            // Keep scroll position stable
-            window.scrollTo(0, 0)
-          }
-        }
-      }
-    },
-    [isInViewport, goToNextCard, goToPrevCard],
-  )
-
-  // Handle wheel events
-  const onWheel = useCallback(
-    (e: WheelEvent) => {
-      // Only handle wheel events when the component is in viewport
-      if (!isInViewport()) return
-
-      const isScrollingDown = e.deltaY > 0
-      const isScrollingUp = e.deltaY < 0
-
-      // If component is not in viewport and we're not at the first card (scrolling up)
-      // or not at the last card (scrolling down), we should handle the event
-      const shouldHandleEvent =
-        (isScrollingDown && !hasScrolledAllCards.current) || (isScrollingUp && isPageAtTop() && !isAtFirstCard.current)
-
-      if (!shouldHandleEvent) {
-        return // Let the page scroll normally
-      }
-
-      // Case 1: Scrolling down and not at the last card - always scroll cards first
-      if (isScrollingDown && !isAtLastCard.current) {
-        e.preventDefault() // Prevent page scrolling
-        goToNextCard()
-        return
-      }
-
-      // Case 2: Scrolling down and at the last card - allow page scrolling
-      if (isScrollingDown && isAtLastCard.current) {
-        return // Don't prevent default, allow page to scroll
-      }
-
-      // Case 3: Scrolling up and at the top of the page and not at the first card - scroll cards in reverse
-      if (isScrollingUp && isPageAtTop() && !isAtFirstCard.current) {
-        e.preventDefault() // Prevent page scrolling
-        goToPrevCard()
-        return
-      }
-
-      // Case 4: Scrolling up but not at the top of the page - allow normal page scrolling
-      if (isScrollingUp && !isPageAtTop()) {
-        return // Don't prevent default, allow page to scroll
-      }
-    },
-    [isInViewport, goToNextCard, goToPrevCard],
-  )
-
-  // Handle touch start event
-  const onTouchStart = useCallback((e: TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY
-  }, [])
-
-  // Handle touch move event
-  const onTouchMove = useCallback(
-    (e: TouchEvent) => {
-      // Only handle touch events when the component is in viewport
-      if (!isInViewport()) return
-
-      // Store current touch position
-      touchEndY.current = e.touches[0].clientY
-
-      // Calculate distance moved
-      const touchDiff = touchStartY.current - touchEndY.current
-
-      // If we're swiping down and not at the last card, prevent default to avoid page scroll
-      if (touchDiff > 0 && !isAtLastCard.current) {
-        e.preventDefault()
-      }
-
-      // If we're swiping up and at the top of the page and not at the first card, prevent default
-      if (touchDiff < 0 && isPageAtTop() && !isAtFirstCard.current) {
-        e.preventDefault()
-      }
-    },
-    [isInViewport],
-  )
-
-  // Handle touch end event
-  const onTouchEnd = useCallback(
-    (e: TouchEvent) => {
-      // Only handle touch events when the component is in viewport
-      if (!isInViewport()) return
-
-      // Calculate swipe distance
-      const touchDiff = touchStartY.current - touchEndY.current
-
-      // If the swipe distance is greater than the minimum, handle the swipe
-      if (Math.abs(touchDiff) > minSwipeDistance) {
-        if (touchDiff > 0) {
-          // Swiped up (move to next card)
-          if (!isAtLastCard.current) {
-            goToNextCard()
-          }
-        } else {
-          // Swiped down (move to previous card)
-          if (isPageAtTop() && !isAtFirstCard.current) {
-            goToPrevCard()
-          }
-        }
-      }
-    },
-    [isInViewport, goToNextCard, goToPrevCard],
-  )
-
   // Initialize the position flags
   useEffect(() => {
     isAtFirstCard.current = current === 0
     isAtLastCard.current = current === topPublications.length - 1
-
-    // Reset the hasScrolledAllCards flag when the component mounts or when current changes to first card
-    if (current === 0) {
-      hasScrolledAllCards.current = false
-    }
   }, [current, topPublications.length])
 
-  // Set up event listeners
   useEffect(() => {
-    // Initialize last scroll position
-    ;(window as any).lastScrollY = window.scrollY
+    const onWheel = (e: WheelEvent) => {
+      if (!isInViewport()) {
+        resetWheelAccumulator()
+        return
+      }
 
-    // Add event listeners
-    document.addEventListener("wheel", onWheel, { passive: false })
-    document.addEventListener("scroll", handleScroll, { passive: false })
+      const isScrollingDown = e.deltaY > 0
+      const isScrollingUp = e.deltaY < 0
 
-    // Add touch event listeners for mobile
-    const container = containerRef.current
-    if (container) {
-      container.addEventListener("touchstart", onTouchStart, { passive: true })
-      container.addEventListener("touchmove", onTouchMove, { passive: false })
-      container.addEventListener("touchend", onTouchEnd, { passive: true })
+      if ((isScrollingDown && isAtLastCard.current) || (isScrollingUp && isAtFirstCard.current)) {
+        resetWheelAccumulator()
+        return
+      }
+
+      wheelDeltaAccumulator.current += e.deltaY
+      scheduleWheelAccumulatorReset()
+
+      if (Math.abs(wheelDeltaAccumulator.current) < 42) {
+        e.preventDefault()
+        return
+      }
+
+      e.preventDefault()
+
+      if (wheelDeltaAccumulator.current > 0) {
+        goToNextCard()
+      } else {
+        goToPrevCard()
+      }
+
+      resetWheelAccumulator()
     }
+
+    window.addEventListener("wheel", onWheel, { passive: false })
 
     return () => {
-      // Remove event listeners
-      document.removeEventListener("wheel", onWheel)
-      document.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("wheel", onWheel)
 
-      // Remove touch event listeners
-      if (container) {
-        container.removeEventListener("touchstart", onTouchStart)
-        container.removeEventListener("touchmove", onTouchMove)
-        container.removeEventListener("touchend", onTouchEnd)
+      if (wheelResetTimeout.current) {
+        clearTimeout(wheelResetTimeout.current)
       }
     }
-  }, [onWheel, handleScroll, onTouchStart, onTouchMove, onTouchEnd])
+  }, [goToNextCard, goToPrevCard, isInViewport, resetWheelAccumulator, scheduleWheelAccumulatorReset])
+
+  useEffect(() => {
+    if (!direction) return
+
+    const timeout = setTimeout(() => setDirection(null), 220)
+    return () => clearTimeout(timeout)
+  }, [direction])
 
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle keyboard events when the component is in viewport
-      if (!isInViewport()) return
+      const container = containerRef.current
+      if (!container) return
+
+      const rect = container.getBoundingClientRect()
+      const inViewport = rect.top < window.innerHeight && rect.bottom > 0
+      if (!inViewport) return
 
       if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         if (!isAtLastCard.current) {
@@ -315,7 +200,7 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isInViewport, goToNextCard, goToPrevCard])
+  }, [goToNextCard, goToPrevCard])
 
   // Handle card click to open modal
   const handleCardClick = (publication: Publication) => {
@@ -334,8 +219,13 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
   }
 
   return (
-    <div ref={containerRef} className={cssStyles.stage}>
-      {topPublications.map((publication, i) => {
+    <div
+      ref={sectionRef}
+      className={cssStyles.section}
+      style={{ ["--stack-cards" as string]: topPublications.length } as CSSProperties}
+    >
+      <div ref={containerRef} className={cssStyles.stage}>
+        {topPublications.map((publication, i) => {
         const offset = i - current // 0 = front, 1 = just behind, …
         const depth = Math.abs(offset)
 
@@ -345,31 +235,30 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
         const isCurrentCard = offset === 0
 
         // Adjust the positioning and scaling based on card position
-        let translateY = offset * 8
-        let scale = 1 - depth * 0.03
+        let translateY = offset * 14
+        let scale = 1 - depth * 0.035
+        let rotateX = 0
 
         // Increase visibility for backward cards (cards above current)
         if (isBackwardCard) {
-          // Show more of backward cards (15px instead of 8px)
-          translateY = offset * 15
+          translateY = offset * 18
+          rotateX = 1.5
         }
 
         // Increase visibility for forward cards (cards below current)
         if (isForwardCard) {
-          // Show more of forward cards (20px instead of 8px)
-          translateY = offset * 20
-
-          // Adjust scale to make forward cards more visible
-          scale = 1 - depth * 0.02
+          translateY = offset * 28
+          scale = 1 - depth * 0.025
+          rotateX = -2
         }
 
         // Default placeholder image if Image_of_Paper is not available
         const placeholderImage = `/placeholder.svg?height=180&width=320&query=AI%20Research%20Publication`
 
-        return (
-          <article
-            key={publication.id}
-            className={`
+          return (
+            <article
+              key={publication.id}
+              className={`
               ${cssStyles.card} 
               ${isForwardCard ? cssStyles.forwardCard : ""} 
               ${isBackwardCard ? cssStyles.backwardCard : ""} 
@@ -379,12 +268,12 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
             `}
             style={{
               zIndex: topPublications.length - depth,
-              transform: `translateY(${translateY}px) scale(${scale})`,
-              opacity: depth > 2 ? 0 : 1, // Hide far-back cards
+              transform: `translate3d(0, ${translateY}px, 0) scale(${scale}) rotateX(${rotateX}deg)`,
+              opacity: depth > 3 ? 0 : Math.max(0.18, 1 - depth * 0.22),
             }}
-            onClick={() => handleCardClick(publication)}
-          >
-            <div className={cssStyles.cardContent}>
+              onClick={() => handleCardClick(publication)}
+            >
+              <div className={cssStyles.cardContent}>
               <div className={cssStyles.cardHeader}>
                 <span className={cssStyles.tag}>{publication.category}</span>
                 <span className={cssStyles.year}>{publication.year}</span>
@@ -456,26 +345,27 @@ export function PublicationCardStack({ publications }: PublicationCardStackProps
                   </a>
                 ) : null}
               </div>
-            </div>
-          </article>
-        )
-      })}
+              </div>
+            </article>
+          )
+        })}
 
-      {/* Card position counter */}
-      <div className={cssStyles.cardCounter}>
-        {current + 1} / {topPublications.length}
-      </div>
-
-      {/* Visual indicator for scrolling */}
-      {!isAtLastCard.current && (
-        <div className={cssStyles.scrollIndicator}>
-          <span>Scroll to see more</span>
-          <ChevronDown size={18} />
+        {/* Card position counter */}
+        <div className={cssStyles.cardCounter}>
+          {current + 1} / {topPublications.length}
         </div>
-      )}
 
-      {/* Publication detail modal */}
-      <PublicationDetailModal publication={selectedPublication} isOpen={isModalOpen} onClose={closeModal} />
+        {/* Visual indicator for scrolling */}
+        {!isAtLastCard.current && (
+          <div className={cssStyles.scrollIndicator}>
+            <span>Scroll to see more</span>
+            <ChevronDown size={18} />
+          </div>
+        )}
+
+        {/* Publication detail modal */}
+        <PublicationDetailModal publication={selectedPublication} isOpen={isModalOpen} onClose={closeModal} />
+      </div>
     </div>
   )
 }

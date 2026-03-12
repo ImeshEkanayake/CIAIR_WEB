@@ -1,3 +1,8 @@
+.section {
+  --stack-cards: 6;
+  position: relative;
+}
+
 .stage {
   position: relative;
   width: 100%;
@@ -5,6 +10,7 @@
   margin: 1rem auto;
   perspective: 1000px;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .card {
@@ -16,28 +22,30 @@
   grid-template-columns: 1fr;
   align-items: center;
   padding: 1.25rem; /* Smaller padding for mobile */
-  transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.25s cubic-bezier(0.25, 0.1, 0.25, 1),
-    box-shadow 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, box-shadow 0.32s ease,
+    filter 0.32s ease;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
   background-color: white;
-  border: 1px solid #eaeaea;
+  border: 1px solid rgba(148, 163, 184, 0.24);
   will-change: transform, opacity;
+  transform-origin: top center;
+  backface-visibility: hidden;
 }
 
 /* Current card highlight effect */
 .currentCard {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-  border-color: #ddd;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+  border-color: rgba(148, 163, 184, 0.3);
   z-index: 10;
 }
 
 /* Animation classes for direction */
 .scrollingUp {
-  animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideUp 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .scrollingDown {
-  animation: slideDown 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideDown 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes slideUp {
@@ -66,34 +74,34 @@
 .forwardCard::after {
   content: "";
   position: absolute;
-  top: -3px; /* Smaller for mobile */
-  left: 0;
-  right: 0;
-  height: 3px; /* Smaller for mobile */
-  background-color: #f0f0f0;
-  border-radius: 3px 3px 0 0;
+  top: -1px;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.7), transparent);
+  border-radius: 999px;
 }
 
 /* Add a subtle indicator for backward cards */
 .backwardCard::after {
   content: "";
   position: absolute;
-  bottom: -3px; /* Smaller for mobile */
-  left: 0;
-  right: 0;
-  height: 3px; /* Smaller for mobile */
-  background-color: #f0f0f0;
-  border-radius: 0 0 3px 3px;
+  bottom: -1px;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.5), transparent);
+  border-radius: 999px;
 }
 
 .dark .card {
   background-color: #1a1a1a;
   border-color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
 }
 
 .dark .currentCard {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
   border-color: #444;
 }
 
@@ -295,13 +303,14 @@
   gap: 6px; /* Smaller for mobile */
   color: #666;
   font-size: 0.75rem; /* Smaller for mobile */
-  opacity: 0.8;
+  opacity: 0.9;
   animation: pulse 2s infinite;
   z-index: 1000;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.82);
   padding: 6px 12px; /* Smaller for mobile */
   border-radius: 16px; /* Smaller for mobile */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(10px);
 }
 
 @keyframes pulse {
