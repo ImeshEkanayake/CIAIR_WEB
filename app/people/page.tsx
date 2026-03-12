@@ -18,8 +18,9 @@ export default async function PeoplePage() {
   // Fetch team members and collaborators from Supabase
   const { data: membersData } = await supabase.from("team_members").select("*").order("name")
 
-  const { data: collaborators = [] } = await supabase.from("collaborators").select("*").order("name")
+  const { data: collaboratorsData } = await supabase.from("collaborators_").select("*").order("name")
   const members = membersData ?? []
+  const collaborators = (collaboratorsData ?? []) as Collaborator[]
 
   // Group team members by category with fallback for empty database
   const founders = members.filter((member) => member.category === "founders")
