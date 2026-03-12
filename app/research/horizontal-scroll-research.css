@@ -1,0 +1,107 @@
+/* Container for the entire horizontal scroll section */
+.horizontal-scroll-section {
+  position: relative;
+  height: 75vh; /* Adjusted height for larger cards */
+  width: 100%;
+  overflow: hidden;
+  margin: 0; /* Remove any margin */
+}
+
+/* The wrapper that becomes sticky */
+.horizontal-wrapper {
+  position: relative;
+  width: 100%;
+  height: 75vh; /* Adjusted height to match container */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin-top: 0; /* Remove top margin to close the gap */
+}
+
+/* Different states of the wrapper */
+.horizontal-wrapper.sticky {
+  position: sticky;
+  top: 0;
+}
+
+/* Container that matches the responsive container width */
+.horizontal-container {
+  position: relative;
+  height: 500px;
+  width: 100% !important;
+  margin: 2rem 0;
+  overflow: hidden !important; /* Prevent content from scrolling outside the page */
+  padding-left: 0 !important; /* Ensure no padding cuts off the first card */
+}
+
+/* The inner container that moves horizontally */
+.inner {
+  position: absolute;
+  display: flex;
+  height: 100%;
+  width: 250% !important; /* Fixed width to fit 6 cards with approximately 2.5 visible at a time */
+  overflow-x: visible !important; /* Allow content to be positioned properly */
+  transition: transform 0.5s ease-out;
+  padding-left: 0 !important; /* Ensure first card starts at the left edge */
+  left: 0 !important; /* Ensure alignment with the container */
+}
+
+/* Card styling */
+.publication-card {
+  flex: 0 0 100% !important; /* Each card takes full width of its container */
+  height: 350px !important;
+  margin-right: 1.5rem !important;
+  transition: transform 0.5s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100% !important; /* Ensure the card takes full width of its container */
+}
+
+.publication-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Card link */
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  width: 15% !important; /* Fixed width - approximately 100% / 4.5 */
+  padding-right: 1rem !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+/* First card specific styling to ensure it's fully visible */
+.inner .card-link:first-child {
+  margin-left: 50 !important;
+}
+
+/* Responsive adjustments with fixed widths */
+@media (max-width: 1024px) {
+  .card-link {
+    width: 33.333% !important; /* Fixed width for medium screens */
+  }
+
+  .inner {
+    width: 350% !important; /* Fixed width for medium screens */
+  }
+}
+
+@media (max-width: 640px) {
+  .card-link {
+    width: 70% !important; /* Fixed width for small screens */
+  }
+
+  .inner {
+    width: 500% !important; /* Fixed width for small screens */
+  }
+}
+
+/* Fix for horizontal scroll width alignment */
+.horizontal-scroll-section .horizontal-container {
+  max-width: var(--container-max-width, 100%) !important;
+  padding-left: var(--container-padding, 0) !important;
+  padding-right: var(--container-padding, 0) !important;
+  margin: 0 auto !important;
+}

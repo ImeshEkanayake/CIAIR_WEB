@@ -1,0 +1,107 @@
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Remove margin to eliminate blank space */
+.horizontal-scroll-section {
+  margin-bottom: 0;
+  margin-top: 0; /* Ensure no top margin */
+}
+
+/* Remove gap between text and horizontal scroll */
+.featured-posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap between elements */
+  position: relative; /* Add position relative */
+  margin-bottom: 2rem; /* Add bottom margin to create space */
+}
+
+.featured-posts-container p {
+  margin-bottom: 1rem; /* Add some bottom margin to the paragraph */
+}
+
+/* Blog post grid */
+.blog-post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .post-link {
+    background-color: var(--background);
+    border-color: var(--border);
+  }
+}
+
+/* Add responsive adjustments */
+@media (max-width: 768px) {
+  .horizontal-scroll-section {
+    height: 50vh; /* Smaller height on mobile */
+  }
+
+  .horizontal-wrapper {
+    height: 50vh; /* Match container height */
+  }
+
+  .featured-posts-container {
+    margin-bottom: 1rem; /* Less margin on mobile */
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 720px) {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Adjust spacing for mobile */
+  .featured-posts-container {
+    margin-bottom: 4%;
+  }
+
+  /* Ensure images are properly sized on mobile */
+  .aspect-video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Adjust text sizes for mobile */
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Ensure proper padding on mobile */
+  .space-y-6 > * {
+    margin-top: 3%;
+    margin-bottom: 3%;
+  }
+
+  /* Ensure full width on mobile */
+  .w-full {
+    width: 100%;
+  }
+
+  /* Adjust card sizes */
+  .featured-card {
+    width: 80vw;
+    max-width: 320px;
+  }
+}

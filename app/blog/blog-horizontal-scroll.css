@@ -1,0 +1,210 @@
+/* Base styles for the horizontal scroll section */
+.blog-horizontal-section {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  margin: 0;
+  margin-bottom: 2rem;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .blog-horizontal-section {
+    height: 50vh;
+  }
+
+  .blog-horizontal-wrapper {
+    height: 50vh;
+  }
+
+  .blog-post-card {
+    min-height: 350px;
+  }
+
+  .blog-post-image-wrapper {
+    height: 150px;
+  }
+
+  .blog-post-content {
+    padding: 0.75rem;
+  }
+
+  .blog-post-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .blog-post-meta {
+    margin-bottom: 0.5rem;
+  }
+
+  .blog-author-image {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* The wrapper that becomes sticky */
+.blog-horizontal-wrapper {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin-top: 0;
+}
+
+/* Different states of the wrapper */
+.blog-horizontal-wrapper.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Add a new rule to ensure the sticky element doesn't overlap */
+.blog-horizontal-wrapper.end-sticky {
+  position: relative;
+}
+
+/* Container that matches the responsive container width */
+.blog-horizontal-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Container for the horizontal content */
+.blog-horizontal-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* The inner container that moves horizontally */
+.blog-horizontal-inner {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  transition: transform 0.3s ease-out;
+}
+
+/* Individual post card */
+.blog-post-card {
+  flex: 0 0 auto;
+  width: 30%;
+  height: auto;
+  max-height: 90%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--card-background, white);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.blog-post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Post link styling */
+.blog-post-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Post image */
+.blog-post-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.blog-post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Post content */
+.blog-post-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+/* Post meta information */
+.blog-post-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.blog-post-category {
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.blog-post-divider {
+  margin: 0 0.5rem;
+}
+
+/* Post title */
+.blog-post-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Post description */
+.blog-post-description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Post author */
+.blog-post-author {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+}
+
+.blog-author-image {
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  object-fit: cover;
+}
+
+.blog-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-author-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.blog-author-title {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}

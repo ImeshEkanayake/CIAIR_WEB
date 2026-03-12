@@ -1,0 +1,41 @@
+/* Remove gap between text and horizontal scroll */
+.featured-projects-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap between elements */
+}
+
+.featured-projects-container p {
+  margin-bottom: 0; /* Remove bottom margin from paragraph */
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .post-link {
+    background-color: var(--background);
+    border-color: var(--border);
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  .research-card {
+    width: 100%;
+    height: 100%;
+  }
+
+  .research-publication-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}

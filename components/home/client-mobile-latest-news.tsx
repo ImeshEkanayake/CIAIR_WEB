@@ -1,0 +1,138 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { ResponsiveContainer } from "@/components/ui/responsive-container"
+import Link from "next/link"
+
+type NewsItem = {
+  id: number
+  title: string
+  description: string
+  image_url: string
+  published_date: string
+  slug: string
+}
+
+export default function ClientMobileLatestNews() {
+  const [news, setNews] = useState<NewsItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const response = await fetch("/api/news")
+        if (!response.ok) {
+          throw new Error("Failed to fetch news")
+        }
+        const data = await response.json()
+        setNews(data)
+      } catch (err) {
+        console.error("Error fetching news:", err)
+        setError("Failed to load latest news")
+        // Use fallback data
+        setNews([
+          {
+            id: 1,
+            title: "New AI Research Center Launched",
+            description:
+              "Our institute has launched a state-of-the-art AI research center to advance machine learning technologies.",
+            image_url: "/placeholder.svg?key=ob2zu",
+            published_date: new Date().toISOString(),
+            slug: "new-ai-research-center-launched",
+          },
+          {
+            id: 2,
+            title: "Breakthrough in Quantum Computing Research",
+            description: "Researchers have achieved a significant breakthrough in quantum computing stability.",
+            image_url: "/quantum-computing-research.png",
+            published_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            slug: "breakthrough-quantum-computing-research",
+          },
+          {
+            id: 3,
+            title: "Annual Research Symposium Announced",
+            description:
+              "Save the date for our annual research symposium featuring keynote speakers from leading institutions.",
+            image_url: "/placeholder.svg?key=xxkno",
+            published_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+            slug: "annual-research-symposium-announced",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNews()
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="w-full py-8">
+        <ResponsiveContainer className="px-4">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        </ResponsiveContainer>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="w-full py-8">
+        <ResponsiveContainer className="px-4">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <h3 className="text-red-800 font-medium">{error}</h3>
+            <p className="text-red-600 text-sm mt-1">Please check the database connection</p>
+          </div>
+        </ResponsiveContainer>
+      </section>
+    )
+  }
+
+  return (
+    <section className="w-full py-8">
+      <ResponsiveContainer className="px-4">
+        <h2 className="text-xl font-bold mb-4">Latest News</h2>
+        <div className="space-y-4">
+          {news.slice(0, 3).map((item) => (
+            <Link href={`/news/${item.slug}`} key={item.id} className="block">
+              <div className="border rounded-lg overflow-hidden">
+                <div className="relative h-40 w-full">
+                  <img
+                    src={item.image_url || "/placeholder.svg"}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <h3 className="font-bold text-sm line-clamp-2">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {new Date(item.published_date).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-4">
+          <Link href="/news" className="text-sm font-medium text-primary flex items-center hover:underline">
+            View all news
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      </ResponsiveContainer>
+    </section>
+  )
+}

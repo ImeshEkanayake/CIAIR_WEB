@@ -1,0 +1,36 @@
+.gsc_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gsc_table th,
+.gsc_table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.gsc_table th {
+  background: #f5f5f5;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* Year headings in black */
+summary {
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: black;
+}
+
+/* Paper-title links in blue */
+.gsc_table a.gsc_a_at {
+  color: blue;
+  text-decoration: none;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 1em 0;
+}
